@@ -3,18 +3,27 @@ dotenv.config();
 
 import express from "express";
 import cors from "cors";
+
 import db from "./db.js";
+
+// importar as rotas novas
+import authRoutes from "./routes/auth.js";
+import processRoutes from "./routes/process.js";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Rota simples só para teste
+// usar as novas rotas
+app.use("/auth", authRoutes);
+app.use("/process", processRoutes);
+
+// rota simples
 app.get('/', (req, res) => {
   res.json({ status: 'ok', env: process.env.NODE_ENV || 'development' });
 });
 
-// Rota para testar conexão com o banco
+// testar DB
 app.get("/test-db", async (req, res) => {
   try {
     const result = await db.query("SELECT NOW()");
@@ -25,7 +34,7 @@ app.get("/test-db", async (req, res) => {
   }
 });
 
-// Listar items
+// listar items
 app.get('/items', async (req, res) => {
   try {
     const result = await db.query('SELECT id, name, created_at FROM items ORDER BY id DESC');
@@ -36,7 +45,7 @@ app.get('/items', async (req, res) => {
   }
 });
 
-// Criar item
+// criar item
 app.post('/items', async (req, res) => {
   const { name } = req.body;
   if (!name) return res.status(400).json({ error: 'name required' });
